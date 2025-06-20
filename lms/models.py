@@ -89,12 +89,7 @@ class Subscription(models.Model):
         verbose_name="Владелец",
         on_delete=models.CASCADE,
     )
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name="курс")
-
-    is_subscribe = models.BooleanField(default=False, verbose_name="подписка")
-
-    def __str__(self):
-        return f'{self.user} - {self.course}'
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = "Подписка"

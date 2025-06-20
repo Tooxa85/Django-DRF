@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from lms.models import Course, Lesson
+from lms.models import Course, Lesson, Subscription
 from users.models import User
 
 
@@ -22,6 +22,9 @@ class CourseTestCase(APITestCase):
             description="Тестовое описание урока",
             course=self.course,
             owner=self.user,
+        )
+        self.subscription = Subscription.objects.create(
+            user=self.user, course=self.course
         )
         self.client.force_authenticate(
             user=self.user
@@ -128,3 +131,19 @@ class LessonTestCase(APITestCase):
         }
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data, result)
+
+
+    def test_subscribe_to_course_no_ex(self):
+        Subscription.objects.all().delete()
+        url = reverse('lms:subscribe')
+        data = {'course_id': ''}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_subscribe_to_course_no_au(self):
+        Subscription.objects.all().delete()
+        self.client.force_authenticate(user='')
+        url = reverse('lms:subscribe')
+        data = {'course_id': self.course.id}
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
